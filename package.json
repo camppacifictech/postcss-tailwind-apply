@@ -1,6 +1,6 @@
 {
   "name": "postcss-tailwind-apply",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "PostCSS plugin to allow variants in Tailwind's @apply at-rule.",
   "keywords": [
     "postcss",
