@@ -1,4 +1,4 @@
-# PostCSS Tw
+# PostCSS Tailwind Apply
 
 [PostCSS] plugin to preprocess Tailwind's @apply at-rule to handle variants, e.g. @apply hover:text-red.
 
@@ -22,8 +22,8 @@ a {
 }
 ```
 
-** N.B.: since this uses the parent selector, an appropriate postcss plugin should be used to handle it, e.g.
-[postcss-nested] (https://github.com/postcss/postcss-nested).**
+**N.B.: since this uses the parent selector, an appropriate postcss plugin should be used to handle it, e.g.
+[postcss-nested](https://github.com/postcss/postcss-nested).**
 
 ## Usage
 
