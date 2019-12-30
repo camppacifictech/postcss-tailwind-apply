@@ -1,13 +1,13 @@
 let postcss = require('postcss')
 
-module.exports = postcss.plugin('postcss-tw', (opts = { }) => {
+module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
 
   // Work with options here
 
   return (root, result) => {
 
     // Transform CSS AST here
-    root.walkAtRules('tw', rule => {
+    root.walkAtRules('apply', rule => {
       let classes = {};
       rule.params.split(' ').forEach(value => {
         let [variant, className] = value.split(':');
@@ -49,6 +49,9 @@ module.exports = postcss.plugin('postcss-tw', (opts = { }) => {
         else if (breakpoints.indexOf(variant) !== -1) {
           const newRoot = postcss.parse(`@screen ${variant} { @apply ${classes[variant].join(' ')}; }`);
           newRules.push(...newRoot.nodes);
+        }
+        else {
+          console.error(`Error [postcss-tailwind-apply]: No selector found for Tailwind variant '${variant}'`);
         }
       });
 
