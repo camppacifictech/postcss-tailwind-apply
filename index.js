@@ -22,7 +22,7 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
       });
 
       const variantSelectors = Object.assign({
-        '_none': null,
+        '_none': '&',
         'hover': '&:hover',
         'focus': '&:focus',
         'group-hover': '.group &:hover',
@@ -37,21 +37,11 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
 
       const breakpoints = opts.breakpoints || ['sm', 'md', 'lg', 'xl'];
 
-      // First, handle classes without variants.
-      if (classes['_none']) {
-        rule.params = classes['_none'].join(' ');
-        delete classes['_none'];
-      }
-      else {
-        rule.params = '';
-      }
-
-      // Now, loop through variants in classes object.
       let newRules = [];
 
       Object.keys(classes).forEach(variant => {
         if (variantSelectors[variant]) {
-          // If there's a non-empty selector defined for this variant, use @apply inside that selector.
+          // If there's a selector defined for this variant, use @apply inside that selector.
           const newRoot = postcss.parse(`${variantSelectors[variant]} { @apply ${classes[variant].join(' ')}; }`);
           newRules.push(...newRoot.nodes);
         }
@@ -65,12 +55,7 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
         }
       });
 
-      if (rule.params) {
-        rule.append(newRules);
-      }
-      else {
-        rule.replaceWith(newRules);
-      }
+      rule.replaceWith(newRules);
     });
   };
 });
