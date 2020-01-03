@@ -25,14 +25,15 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
         '_none': '&',
         'hover': '&:hover',
         'focus': '&:focus',
-        'group-hover': '.group &:hover',
+        'active': '&:active',
+        'disabled': '&:disabled',
+        'visited': '&:visited',
         'first': '&:first-child',
         'last': '&:last-child',
-        'odd': '&:nth(2n+1)',
-        'even': '&:nth(2n)',
-        'active': '&:active',
-        'visited': '&:visited',
-        'disabled': '&:disabled',
+        'odd': '&:nth-child(odd)',
+        'even': '&:nth-child(even)',
+        'group-hover': '.group:hover &',
+        'focus-within': '&:focus-within',
       }, opts.customVariantSelectors || {});
 
       const breakpoints = opts.breakpoints || ['sm', 'md', 'lg', 'xl'];
