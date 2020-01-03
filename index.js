@@ -2,23 +2,21 @@ let postcss = require('postcss')
 
 module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
 
-  // Work with options here
-
   return (root, result) => {
 
-    // Transform CSS AST here
+    // Walk @apply rules.
     root.walkAtRules('apply', rule => {
-      let classes = {};
+      let classesByVariant = {};
+
       rule.params.split(' ').forEach(value => {
-        let [variant, className] = value.split(':');
-        if (!className) {
-          className = variant;
-          variant = '_none';
-        }
-        if (!classes[variant]) {
-          classes[variant] = [];
-        }
-        classes[variant].push(className);
+
+        // Parse variant & classes.
+        // Allow for multiple classes grouped in parentheses, e.g. hover:(text-red underline).
+        let [classes, variant] = value.split(':').reverse();
+        variant = variant || '_none';
+        classes = classes.replace('(', '').replace(')', '').split(' ');
+
+        classesByVariant[variant] = (classesByVariant[variant] || []).concat(classes);
       });
 
       const variantSelectors = Object.assign({
@@ -40,15 +38,15 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
 
       let newRules = [];
 
-      Object.keys(classes).forEach(variant => {
+      Object.keys(classesByVariant).forEach(variant => {
         if (variantSelectors[variant]) {
           // If there's a selector defined for this variant, use @apply inside that selector.
-          const newRoot = postcss.parse(`${variantSelectors[variant]} { @apply ${classes[variant].join(' ')}; }`);
+          const newRoot = postcss.parse(`${variantSelectors[variant]} { @apply ${classesByVariant[variant].join(' ')}; }`);
           newRules.push(...newRoot.nodes);
         }
         else if (breakpoints.indexOf(variant) !== -1) {
           // Else if the variant is a breakpoint, use @apply inside @screen.
-          const newRoot = postcss.parse(`@screen ${variant} { @apply ${classes[variant].join(' ')}; }`);
+          const newRoot = postcss.parse(`@screen ${variant} { @apply ${classesByVariant[variant].join(' ')}; }`);
           newRules.push(...newRoot.nodes);
         }
         else {
