@@ -5,15 +5,15 @@
 [PostCSS]: https://github.com/postcss/postcss
 
 ```css
+/* Input */
 a {
-  /* Input example */
   @apply text-black hover:text-red;
 }
 ```
 
 ```css
+/* Output */
 a {
-  /* Output example */
   @apply text-black;
 
   &:hover {
@@ -25,7 +25,32 @@ a {
 **N.B.: since this uses the parent selector, an appropriate postcss plugin should be used to handle it, e.g.
 [postcss-nested](https://github.com/postcss/postcss-nested).**
 
-## Usage
+Variant prefixes can even be chained, for example:
+
+## Installation
+```css
+/* Input */
+a {
+  @apply text-black hover:text-red first:hover:text-blue;
+}
+```
+
+```css
+/* Output */
+a {
+  @apply text-black;
+
+  &:hover {
+    @apply text-red;
+  }
+
+  &:first-child {
+    &:hover {
+      @apply text-blue;
+    }
+  }
+}
+```
 
 Ensure to add the plugin before the tailwindcss plugin, as below:
 
