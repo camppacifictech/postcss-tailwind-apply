@@ -50,7 +50,7 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
     if (!rules.length) {
       rules = [`@apply ${classes.join(' ')};`];
     }
-    const rule = `${selectors.map(s =>`${s} { `)} ${rules.join(' ')} ${selectors.map(s => ' } ')}`;
+    const rule = `${selectors.map(s =>`${s} { `).join('')} ${rules.join(' ')} ${selectors.map(s => ' } ').join('')}`;
 
     // Return postcss rule/s.
     const root = postcss.parse(rule);

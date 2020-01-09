@@ -2,6 +2,8 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+0.0.7: bugfix to prevent commans in generated rules
+
 0.0.6: renamed customVariantSelectors to customVariants and allowed functions as values, to return a rule to use.
 
 0.0.5: added variant chaining, e.g. hover:after:text-red.
