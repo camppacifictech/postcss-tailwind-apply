@@ -68,7 +68,7 @@ module.exports = {
 ### breakpoints
 Array of breakpoint names used in responsive variants - defaults to Tailwind's ['sm', 'md', 'lg', 'xl'].
 
-### customVariantSelectors
+### customVariants
 Map of any custom variants required, along with the selector to be used to handle it, e.g.:
 
 `{
@@ -77,3 +77,11 @@ Map of any custom variants required, along with the selector to be used to handl
 
 These variants don't even have to be registered in Tailwind, since this plugin processes them to regular @apply at-rules.
 
+Rather than a selector string, the value can be a function which takes a class as the argument and returns the rule to
+be applied, for example:
+
+`{
+    important: c => `@apply ${c} !important;`
+}`
+
+NB: ensure not to use the reserved keyword 'class' as the argument name.

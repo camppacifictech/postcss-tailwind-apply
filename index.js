@@ -3,7 +3,8 @@ let postcss = require('postcss')
 module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
 
   const variantSelectors = Object.assign({
-    '_none': '&',
+    '_none': null,
+    'important': c => `@apply ${c} !important;`,
     'hover': '&:hover',
     'focus': '&:focus',
     'active': '&:active',
@@ -15,39 +16,45 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
     'even': '&:nth-child(even)',
     'group-hover': '.group:hover &',
     'focus-within': '&:focus-within',
-  }, opts.customVariantSelectors || {});
+  }, opts.customVariants || {});
 
   const breakpoints = opts.breakpoints || ['sm', 'md', 'lg', 'xl'];
 
-  function getRules(prefix, classes) {
-    let cssOpen = '',
-        cssClose = '';
+  function getRule(prefix, classes) {
+    // Init rule and selector.
+    let rules = [], selectors = [];
 
-    // Allow for multiple variant prefixes, e.g. 'first:hover'.
-    prefix.split(':').forEach(variant => {
-      if (variantSelectors[variant]) {
+    // Allow for multiple variant prefixes, e.g. 'first:hover'. These need to be applied inside-out.
+    prefix.split(':').reverse().forEach(variant => {
+      if (typeof variantSelectors[variant] !== 'undefined') {
         // If there's a selector defined for this variant, use @apply inside that selector.
-        cssOpen += `${variantSelectors[variant]} { `;
-        cssClose += ' }';
+        if (typeof variantSelectors[variant] === 'function') {
+          rules = rules.concat(classes.map(variantSelectors[variant]));
+        }
+        else {
+          selectors.push(variantSelectors[variant]);
+        }
       }
       else if (breakpoints.indexOf(variant) !== -1) {
-        // Else if the variant is a breakpoint, use @apply inside @screen.
-        cssOpen += `@screen ${variant} { `;
-        cssClose += ' }';
+        // Else if the variant is a breakpoint, use @screen.
+        selectors.push(`@screen ${variant}`);
       }
       else {
         // Else, log an error.
-        console.error(`Error [postcss-tailwind-apply]: No selector found for Tailwind variant '${variant}'`);
+        console.warn(`Error [postcss-tailwind-apply]: No selector found for Tailwind variant '${variant}'`);
       }
     });
 
-    if (cssOpen && cssClose) {
-      // NB cssStr has an open curly brace.
-      const root = postcss.parse(`${cssOpen} @apply ${classes.join(' ')}; ${cssClose}`);
-      return root.nodes;
+    // Generate rule.
+    selectors = selectors.filter(v => v);
+    if (!rules.length) {
+      rules = [`@apply ${classes.join(' ')};`];
     }
+    const rule = `${selectors.map(s =>`${s} { `)} ${rules.join(' ')} ${selectors.map(s => ' } ')}`;
 
-    return [];
+    // Return postcss rule/s.
+    const root = postcss.parse(rule);
+    return root.nodes;
   }
 
   return (root, result) => {
@@ -71,7 +78,7 @@ module.exports = postcss.plugin('postcss-tailwind-apply', (opts = { }) => {
       let newRules = [];
 
       Object.keys(classesByPrefix).forEach(prefix => {
-        newRules = newRules.concat(getRules(prefix, classesByPrefix[prefix]));
+        newRules = newRules.concat(getRule(prefix, classesByPrefix[prefix]));
       });
 
       rule.replaceWith(newRules);
